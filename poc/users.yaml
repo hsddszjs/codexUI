@@ -1,6 +1,26 @@
-# 6 个内置用户(PoC 阶段先放 1 个,后续手动追加)
+# 6 个内置用户(必须跟 src/server/userConfig.ts 的 CONTAINER_USERS 同步)
 users:
   - name: wangshunfeng
     display: Wang Shunfeng
     gitName: Wang Shunfeng
     gitEmail: wangshunfeng@example.com
+  - name: zhangsan
+    display: Zhang San
+    gitName: Zhang San
+    gitEmail: zhangsan@example.com
+  - name: lisi
+    display: Li Si
+    gitName: Li Si
+    gitEmail: lisi@example.com
+  - name: wangwu
+    display: Wang Wu
+    gitName: Wang Wu
+    gitEmail: wangwu@example.com
+  - name: zhaoliu
+    display: Zhao Liu
+    gitName: Zhao Liu
+    gitEmail: zhaoliu@example.com
+  - name: sunqi
+    display: Sun Qi
+    gitName: Sun Qi
+    gitEmail: sunqi@example.com

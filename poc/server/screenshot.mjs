@@ -24,7 +24,7 @@ async function shot(name, page) {
 
 // 1) 首访,无 cookie
 const page1 = await ctx.newPage()
-page1.on('console', (m) => console.log('  [browser]', m.type(), m.text()))
+page1.on('console', (m) => {/* 静默,只记 error */ if (m.type() === 'error') console.log('  [browser]', m.type(), m.text().slice(0, 80)) })
 await page1.goto(BASE, { waitUntil: 'networkidle' })
 await page1.waitForTimeout(1500)
 await shot('01-picker', page1)

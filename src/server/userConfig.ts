@@ -20,12 +20,11 @@ export type UserDef = {
 
 export const CONTAINER_USERS: readonly UserDef[] = [
   { name: 'wangshunfeng', display: 'Wang Shunfeng', gitName: 'Wang Shunfeng', gitEmail: 'wangshunfeng@example.com' },
-  // 加用户在这里:
-  // { name: 'lishi',        display: 'Li Shi',        gitName: 'Li Shi',        gitEmail: 'lishi@example.com' },
-  // { name: 'zhangsan',     display: 'Zhang San',     gitName: 'Zhang San',     gitEmail: 'zhangsan@example.com' },
-  // { name: 'zhaoliu',      display: 'Zhao Liu',      gitName: 'Zhao Liu',      gitEmail: 'zhaoliu@example.com' },
-  // { name: 'sunwukong',    display: 'Sun Wukong',    gitName: 'Sun Wukong',    gitEmail: 'sunwukong@example.com' },
-  // { name: 'zhubajie',     display: 'Zhu Bajie',     gitName: 'Zhu Bajie',     gitEmail: 'zhubajie@example.com' },
+  { name: 'zhangsan',     display: 'Zhang San',     gitName: 'Zhang San',     gitEmail: 'zhangsan@example.com' },
+  { name: 'lisi',         display: 'Li Si',         gitName: 'Li Si',         gitEmail: 'lisi@example.com' },
+  { name: 'wangwu',       display: 'Wang Wu',       gitName: 'Wang Wu',       gitEmail: 'wangwu@example.com' },
+  { name: 'zhaoliu',      display: 'Zhao Liu',      gitName: 'Zhao Liu',      gitEmail: 'zhaoliu@example.com' },
+  { name: 'sunqi',        display: 'Sun Qi',        gitName: 'Sun Qi',        gitEmail: 'sunqi@example.com' },
 ] as const
 
 export const USER_COOKIE = 'codexui_user'
