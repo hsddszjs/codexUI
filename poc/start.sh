@@ -33,14 +33,23 @@ if [[ ! -f config/auth.json ]]; then
   exit 1
 fi
 
-CONFIG_TOML=$(cat config/config.toml)
-AUTH_JSON=$(cat config/auth.json)
-
 # 装 sidecar 的 node_modules(ws,纯 JS,跨平台)
 if [[ ! -d sidecar/node_modules ]]; then
   echo "==> npm install (sidecar deps)"
   ( cd sidecar && npm install --silent --no-audit --no-fund )
 fi
+
+# 每个用户一个 state 目录 mount 到容器:
+#   state/<user>/codex-home  → /root/.codex(含 config.toml + auth.json + sessions/)
+#   state/<user>/workspace   → /workspace(codex 干活的 cwd)
+# 第一次创建时从 config/ 模板拷贝.之后宿主直接编辑 state/<user>/codex-home/* 立即生效.
+init_user_state() {
+  local USER_NAME="$1"
+  local STATE_DIR="state/${USER_NAME}"
+  mkdir -p "${STATE_DIR}/codex-home" "${STATE_DIR}/workspace"
+  [[ -f "${STATE_DIR}/codex-home/config.toml" ]] || cp config/config.toml "${STATE_DIR}/codex-home/config.toml"
+  [[ -f "${STATE_DIR}/codex-home/auth.json"   ]] || cp config/auth.json   "${STATE_DIR}/codex-home/auth.json"
+}
 
 # 解析 users.yaml.列表:无外部依赖,sed/awk 即可.
 # 期望格式:每个 user 一组连续的 - name / display / gitName / gitEmail.
@@ -56,6 +65,7 @@ parse_users() {
 start_one() {
   local USER_NAME="$1" GIT_NAME="$2" GIT_EMAIL="$3"
   local CONTAINER="codex-${USER_NAME}"
+  init_user_state "$USER_NAME"
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
   docker run -d \
     --name "$CONTAINER" \
@@ -66,13 +76,13 @@ start_one() {
     -e GIT_AUTHOR_EMAIL="$GIT_EMAIL" \
     -e GIT_COMMITTER_NAME="$GIT_NAME" \
     -e GIT_COMMITTER_EMAIL="$GIT_EMAIL" \
-    -e CODEX_CONFIG_TOML="$CONFIG_TOML" \
-    -e CODEX_AUTH_JSON="$AUTH_JSON" \
     -e BRIDGE_HOST_URL="$HOST_URL" \
     -v "$(pwd)/sidecar:/sidecar:ro" \
+    -v "$(pwd)/state/${USER_NAME}/codex-home:/root/.codex" \
+    -v "$(pwd)/state/${USER_NAME}/workspace:/workspace" \
     "$IMAGE" \
     node /sidecar/sidecar.mjs >/dev/null
-  echo "  → $CONTAINER  (git: $GIT_NAME <$GIT_EMAIL>)"
+  echo "  → $CONTAINER  (git: $GIT_NAME <$GIT_EMAIL>)  state: state/${USER_NAME}/"
 }
 
 count=0

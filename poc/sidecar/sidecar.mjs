@@ -1,40 +1,24 @@
 #!/usr/bin/env node
 // 容器内运行:
-//   1. 把 env 里的 codex 配置 / auth 落到 ~/.codex/
-//   2. spawn `codex app-server`(stdio JSON-RPC)
-//   3. 主动 dial 宿主 server 的 /container-ws
-//   4. 把 codex stdout 转发到 ws,把 ws 收到的 msg 写回 codex stdin
+//   1. spawn `codex app-server`(stdio JSON-RPC),最高权限,无 prompt
+//   2. 主动 dial 宿主 server 的 /codex-api/container-ws
+//   3. 把 codex stdout 转发到 ws,把 ws 收到的 msg 写回 codex stdin
+//
+// 假设(由宿主 start.sh 保证):
+//   /root/.codex/config.toml + auth.json    宿主侧 bind mount 进来,可在宿主直接编辑
+//   /workspace                               宿主侧 bind mount,codex 实际操作的 cwd
 //
 // 出错就 exit,让 docker --restart 拉起来。
 
 import { spawn } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
-import path from 'node:path'
 import readline from 'node:readline'
 import WebSocket from 'ws'
 
-const {
-  USER_NAME,
-  BRIDGE_HOST_URL,
-  CODEX_CONFIG_TOML,
-  CODEX_AUTH_JSON,
-  CODEX_HOME,
-} = process.env
+const { USER_NAME, BRIDGE_HOST_URL } = process.env
 
 if (!USER_NAME || !BRIDGE_HOST_URL) {
   console.error('[sidecar] USER_NAME and BRIDGE_HOST_URL are required')
   process.exit(2)
-}
-
-// 1. materialize codex config files
-const codexHome = CODEX_HOME || path.join(homedir(), '.codex')
-mkdirSync(codexHome, { recursive: true })
-if (CODEX_CONFIG_TOML) {
-  writeFileSync(path.join(codexHome, 'config.toml'), CODEX_CONFIG_TOML)
-}
-if (CODEX_AUTH_JSON) {
-  writeFileSync(path.join(codexHome, 'auth.json'), CODEX_AUTH_JSON, { mode: 0o600 })
 }
 
 // 2. spawn codex app-server
@@ -46,7 +30,7 @@ const codex = spawn('codex', [
   '-c', 'sandbox_mode="danger-full-access"',
 ], {
   stdio: ['pipe', 'pipe', 'inherit'],
-  env: { ...process.env, CODEX_HOME: codexHome },
+  env: process.env,
 })
 codex.on('error', (err) => {
   console.error('[sidecar] codex spawn error:', err.message)

@@ -33,21 +33,41 @@
 ```
 poc/
 ├── Dockerfile              ubuntu:24.04 + node22 + @openai/codex
-├── users.yaml              用户清单(PoC 1 个,扩到 6 个直接加)
-├── start.sh                构建镜像 + 起容器
-├── stop.sh                 停容器
+├── users.yaml              用户清单
+├── start.sh                构建镜像 + 起 6 个容器(或单起一个)
+├── stop.sh                 停所有 codex-* 容器
 ├── config/
-│   ├── config.toml         注入到容器内 ~/.codex/config.toml
-│   ├── auth.json           真 API key,gitignore
-│   └── auth.json.example   提交在仓库的样例
+│   ├── config.toml         模板,首次启动时复制到 state/<user>/codex-home/
+│   ├── auth.json           真 API key 模板(gitignore)
+│   └── auth.json.example   样例(提交到仓库)
+├── state/                  ← gitignore.每个用户一份,运行时数据
+│   └── <user>/
+│       ├── codex-home/     bind mount 到容器 /root/.codex
+│       │   ├── config.toml ← **宿主可直接编辑**(改完重启容器生效)
+│       │   ├── auth.json   ← **宿主可直接编辑**
+│       │   └── sessions/   ← 对话记录持久化(rollout-*.jsonl)
+│       └── workspace/      bind mount 到容器 /workspace
 ├── sidecar/
-│   ├── sidecar.mjs         容器内桥接进程
+│   ├── sidecar.mjs         容器内桥接进程(只 spawn codex + ws,不再写 config)
 │   └── package.json        只依赖 ws
 └── server/
-    ├── server.mjs          宿主侧 5173 端口
+    ├── server.mjs          独立 PoC server(用于 webdav 调试,主仓库不依赖)
+    ├── screenshot.mjs      playwright 自动截图
+    ├── screenshot-chat.mjs playwright 模拟键盘输入对话
     ├── public/index.html   手敲调试页
-    └── package.json        express + ws
+    └── package.json        express + ws + playwright
 ```
+
+## 持久化模型
+
+| 路径(容器内) | 宿主路径 | 销毁 `docker rm -f` 后 |
+|---|---|---|
+| `/root/.codex/config.toml`、`auth.json` | `state/<user>/codex-home/` | **保留**(bind mount) |
+| `/root/.codex/sessions/*.jsonl` | `state/<user>/codex-home/sessions/` | **保留**(对话记录) |
+| `/workspace` | `state/<user>/workspace/` | **保留**(codex 创建的文件) |
+| 其它容器层(/usr/lib 等) | (无) | 销毁 |
+
+要彻底清掉某个用户的数据:`rm -rf poc/state/<user>`。
 
 ## 启动步骤(macOS / Linux,Docker Desktop 默认 bridge 网络即可)
 
