@@ -1,0 +1,6 @@
+# 6 个内置用户(PoC 阶段先放 1 个,后续手动追加)
+users:
+  - name: wangshunfeng
+    display: Wang Shunfeng
+    gitName: Wang Shunfeng
+    gitEmail: wangshunfeng@example.com

@@ -1,0 +1,9 @@
+{
+  "name": "codexui-poc-sidecar",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
