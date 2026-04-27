@@ -9,7 +9,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 IMAGE="${IMAGE:-codexui-poc-base:latest}"
-HOST_URL="${BRIDGE_HOST_URL:-ws://host.docker.internal:5173/container-ws}"
+HOST_URL="${BRIDGE_HOST_URL:-ws://host.docker.internal:5173/codex-api/container-ws}"
 
 if [[ "${1:-}" != "--no-build" ]]; then
   echo "==> docker build $IMAGE"

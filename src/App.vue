@@ -1,5 +1,6 @@
 <template>
-  <DesktopLayout :is-sidebar-collapsed="isSidebarCollapsed" @close-sidebar="setSidebarCollapsed(true)">
+  <UserPicker v-if="showUserPicker" @selected="onUserSelected" />
+  <DesktopLayout v-else :is-sidebar-collapsed="isSidebarCollapsed" @close-sidebar="setSidebarCollapsed(true)">
     <template #sidebar>
       <section class="sidebar-root">
         <div class="sidebar-scrollable">
@@ -459,7 +460,7 @@
         :style="contentStyle"
       >
         <span v-if="isVirtualKeyboardOpen" class="content-keyboard-spacer" aria-hidden="true" />
-        <ContentHeader :title="contentTitle" :accent="isSkillsRoute">
+        <ContentHeader :title="contentTitle" :accent="isSkillsRoute" :current-user="currentUser">
           <template #leading>
             <SidebarThreadControls
               v-if="isSidebarCollapsed || isMobile"
@@ -843,6 +844,7 @@
 import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DesktopLayout from './components/layout/DesktopLayout.vue'
+import UserPicker from './components/UserPicker.vue'
 import SidebarThreadTree from './components/sidebar/SidebarThreadTree.vue'
 import ContentHeader from './components/content/ContentHeader.vue'
 import ThreadComposer from './components/content/ThreadComposer.vue'
@@ -894,6 +896,25 @@ const ThreadTerminalPanel = defineAsyncComponent(() => import('./components/cont
 const ReviewPane = defineAsyncComponent(() => import('./components/content/ReviewPane.vue'))
 const DirectoryHub = defineAsyncComponent(() => import('./components/content/DirectoryHub.vue'))
 const { t, uiLanguage, uiLanguageOptions, setUiLanguage } = useUiLanguage()
+
+// 容器模式:首访身份选择
+const currentUser = ref<string | null>(null)
+const userBootstrapped = ref(false)
+const showUserPicker = computed(() => userBootstrapped.value && currentUser.value === null)
+async function bootstrapCurrentUser(): Promise<void> {
+  try {
+    const r = await fetch('/codex-api/auth/whoami', { credentials: 'same-origin' })
+    if (r.ok) {
+      const j = (await r.json()) as { currentUser: string | null }
+      currentUser.value = j.currentUser ?? null
+    }
+  } catch { currentUser.value = null }
+  userBootstrapped.value = true
+}
+function onUserSelected(_userName: string): void {
+  // 选完直接 reload,所有 RPC 都会带新 cookie
+  window.location.reload()
+}
 
 const SIDEBAR_COLLAPSED_STORAGE_KEY = 'codex-web-local.sidebar-collapsed.v1'
 const ACCOUNTS_SECTION_COLLAPSED_STORAGE_KEY = 'codex-web-local.accounts-section-collapsed.v1'
@@ -1541,7 +1562,11 @@ onMounted(() => {
   updateVisualViewportState()
   applyDarkMode()
   darkModeMediaQuery?.addEventListener('change', applyDarkMode)
-  void initialize()
+  // 容器模式:先确认有 user cookie 再做 codex 初始化
+  void (async () => {
+    await bootstrapCurrentUser()
+    if (currentUser.value) void initialize()
+  })()
   void loadHomeDirectory()
   void loadFirstLaunchPluginsCardPreference()
   void loadWorkspaceRootOptionsState()

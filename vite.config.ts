@@ -1,13 +1,12 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { createCodexBridgeMiddleware } from "./src/server/codexAppServerBridge";
+import { createContainerMiddleware } from "./src/server/containerMiddleware";
 import { createDirectoryListingHtml, createTextEditorHtml, decodeBrowsePath, getLocalDirectoryListing, isTextEditableFile, normalizeLocalPath } from "./src/server/localBrowseUi";
 import tailwindcss from "@tailwindcss/vite";
 import { spawnSync } from "node:child_process";
 import { createReadStream, existsSync, readFileSync } from "node:fs";
 import { stat, writeFile } from "node:fs/promises";
 import { basename, extname, isAbsolute } from "node:path";
-import { WebSocketServer, type WebSocket } from "ws";
 import pkg from "./package.json";
 
 const IMAGE_CONTENT_TYPES: Record<string, string> = {
@@ -129,7 +128,7 @@ export default defineConfig({
       name: "codex-bridge",
       configureServer(server) {
         process.env.CODEXUI_SERVER_PORT = String(server.config.server.port ?? 5173);
-        const bridge = createCodexBridgeMiddleware();
+        const containerMw = createContainerMiddleware();
         const httpServer = server.httpServer;
         if (httpServer) {
           httpServer.once("listening", () => {
@@ -143,35 +142,15 @@ export default defineConfig({
           };
           if (!hostScope[WS_UPGRADE_ATTACHED_KEY]) {
             hostScope[WS_UPGRADE_ATTACHED_KEY] = true;
-            const wss = new WebSocketServer({ noServer: true });
 
             httpServer.on("upgrade", (req, socket, head) => {
-              const requestUrl = new URL(req.url ?? "", "http://localhost");
-              if (requestUrl.pathname !== "/codex-api/ws") return;
-              wss.handleUpgrade(req, socket, head, (ws: WebSocket) => {
-                wss.emit("connection", ws, req);
-              });
-            });
-
-            wss.on("connection", (ws: WebSocket) => {
-              ws.send(
-                JSON.stringify({
-                  method: "ready",
-                  params: { ok: true },
-                  atIso: new Date().toISOString(),
-                }),
-              );
-              const unsubscribe = bridge.subscribeNotifications((notification) => {
-                if (ws.readyState !== ws.OPEN) return;
-                ws.send(JSON.stringify(notification));
-              });
-
-              ws.on("close", unsubscribe);
-              ws.on("error", unsubscribe);
+              const handled = containerMw.attachUpgrade(req, socket, head);
+              // 未匹配的 upgrade 让 vite 自己处理(HMR 等)
+              if (!handled) return;
             });
 
             httpServer.once("close", () => {
-              wss.close();
+              containerMw.dispose();
             });
           }
         }
@@ -373,9 +352,9 @@ export default defineConfig({
             res.end(JSON.stringify({ error: "Write failed." }));
           });
         });
-        server.middlewares.use(bridge);
+        server.middlewares.use((req, res, next) => containerMw.handle(req, res, next));
         server.httpServer?.once("close", () => {
-          bridge.dispose();
+          containerMw.dispose();
         });
       },
     },

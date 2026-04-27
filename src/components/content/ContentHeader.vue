@@ -6,6 +6,10 @@
     <h1 class="content-title" :class="{ 'is-accent': accent }" :title="title">{{ title }}</h1>
     <div class="content-actions">
       <slot name="actions" />
+      <span v-if="currentUser" class="content-user-badge" :title="`当前身份: ${currentUser}`">
+        <span class="content-user-dot"></span>
+        {{ currentUser }}
+      </span>
     </div>
   </header>
 </template>
@@ -14,6 +18,7 @@
 defineProps<{
   title: string
   accent?: boolean
+  currentUser?: string | null
 }>()
 </script>
 
@@ -42,6 +47,18 @@ defineProps<{
 
 .content-leading.is-accent {
   @apply gap-2;
+}
+
+.content-user-badge {
+  @apply inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700;
+}
+
+.content-user-dot {
+  @apply inline-block w-1.5 h-1.5 rounded-full bg-emerald-500;
+}
+
+:global(:root.dark) .content-user-badge {
+  @apply border-emerald-700 bg-emerald-900/40 text-emerald-200;
 }
 
 :global(:root.dark) .content-title.is-accent {

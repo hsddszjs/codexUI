@@ -29,7 +29,7 @@
             <button class="thread-main-button" type="button" @click.stop="onSelect(thread.id)">
               <span class="thread-row-title-wrap">
                 <span class="thread-row-title-line">
-                  <span class="thread-row-title">{{ thread.title }}</span>
+                  <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
                   <IconTablerGitFork v-if="thread.hasWorktree" class="thread-row-worktree-icon" :title="t('Worktree thread')" />
                   <span
                     v-if="threadHasAutomation(thread.id)"
@@ -144,7 +144,7 @@
           <button class="thread-main-button" type="button" @click.stop="onSelect(thread.id)">
             <span class="thread-row-title-wrap">
               <span class="thread-row-title-line">
-                <span class="thread-row-title">{{ thread.title }}</span>
+                <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
                 <IconTablerGitFork v-if="thread.hasWorktree" class="thread-row-worktree-icon" :title="t('Worktree thread')" />
                 <span
                   v-if="threadHasAutomation(thread.id)"
@@ -309,7 +309,7 @@
                 <button class="thread-main-button" type="button" @click.stop="onSelect(thread.id)">
                   <span class="thread-row-title-wrap">
                     <span class="thread-row-title-line">
-                      <span class="thread-row-title">{{ thread.title }}</span>
+                      <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
                       <IconTablerGitFork v-if="thread.hasWorktree" class="thread-row-worktree-icon" :title="t('Worktree thread')" />
                       <span
                         v-if="threadHasAutomation(thread.id)"
@@ -1997,6 +1997,14 @@ onBeforeUnmount(() => {
 
 .thread-row-title {
   @apply min-w-0 block flex-1 text-sm leading-5 font-normal text-zinc-800 truncate whitespace-nowrap;
+}
+
+.thread-row-owner {
+  @apply inline-flex items-center shrink-0 mr-1.5 rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0 text-[10px] font-mono leading-4 text-slate-600 whitespace-nowrap;
+}
+
+:global(:root.dark) .thread-row-owner {
+  @apply border-zinc-700 bg-zinc-800 text-zinc-300;
 }
 
 .thread-row-worktree-icon {

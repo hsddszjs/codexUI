@@ -553,6 +553,11 @@ function toUiThread(summary: Thread): UiThread {
     comparableCwd.includes('/.codex/worktrees/') ||
     comparableCwd.includes('/.git/worktrees/')
 
+  const ownerUserName =
+    typeof rawSummary.__owner === 'string' && rawSummary.__owner.length > 0
+      ? rawSummary.__owner
+      : null
+
   return {
     id: summary.id,
     title: toThreadTitle(summary),
@@ -564,6 +569,7 @@ function toUiThread(summary: Thread): UiThread {
     preview: summary.preview,
     unread: false,
     inProgress: readThreadInProgress(summary),
+    ownerUserName,
   }
 }
 

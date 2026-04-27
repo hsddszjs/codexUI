@@ -4,7 +4,7 @@ import type { Server as HttpServer, IncomingMessage } from 'node:http'
 import { existsSync } from 'node:fs'
 import { writeFile, stat } from 'node:fs/promises'
 import express, { type Express } from 'express'
-import { createCodexBridgeMiddleware } from './codexAppServerBridge.js'
+import { createContainerMiddleware } from './containerMiddleware.js'
 import { createAuthSession } from './authMiddleware.js'
 import { createDirectoryListingHtml, createTextEditorHtml, decodeBrowsePath, getLocalDirectoryListing, isTextEditableFile, normalizeLocalPath } from './localBrowseUi.js'
 import { WebSocketServer, type WebSocket } from 'ws'
@@ -74,7 +74,7 @@ function readWildcardPathParam(value: unknown): string {
 
 export function createServer(options: ServerOptions = {}): ServerInstance {
   const app = express()
-  const bridge = createCodexBridgeMiddleware()
+  const containerMw = createContainerMiddleware()
   const authSession = options.password ? createAuthSession(options.password) : null
 
   // 1. Auth middleware (if password is set)
@@ -82,8 +82,8 @@ export function createServer(options: ServerOptions = {}): ServerInstance {
     app.use(authSession.middleware)
   }
 
-  // 2. Bridge middleware for /codex-api/*
-  app.use(bridge)
+  // 2. Container middleware for /codex-api/*
+  app.use((req, res, next) => containerMw.handle(req, res, next))
 
   // 3. Serve local images referenced in markdown (desktop parity for absolute image paths)
   app.get('/codex-local-image', (req, res) => {
@@ -251,36 +251,17 @@ export function createServer(options: ServerOptions = {}): ServerInstance {
 
   return {
     app,
-    dispose: () => bridge.dispose(),
+    dispose: () => containerMw.dispose(),
     attachWebSocket: (server: HttpServer) => {
-      const wss = new WebSocketServer({ noServer: true })
-
       server.on('upgrade', (req: IncomingMessage, socket, head) => {
         const url = new URL(req.url ?? '', 'http://localhost')
-        if (url.pathname !== '/codex-api/ws') {
-          return
-        }
-
-        if (authSession && !authSession.isRequestAuthorized(req)) {
+        // 浏览器订阅通道要鉴权;容器侧 /container-ws 不鉴权(纯内网)
+        if (url.pathname === '/codex-api/ws' && authSession && !authSession.isRequestAuthorized(req)) {
           socket.write('HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n')
           socket.destroy()
           return
         }
-
-        wss.handleUpgrade(req, socket, head, (ws: WebSocket) => {
-          wss.emit('connection', ws, req)
-        })
-      })
-
-      wss.on('connection', (ws: WebSocket) => {
-        ws.send(JSON.stringify({ method: 'ready', params: { ok: true }, atIso: new Date().toISOString() }))
-        const unsubscribe = bridge.subscribeNotifications((notification) => {
-          if (ws.readyState !== 1) return
-          ws.send(JSON.stringify(notification))
-        })
-
-        ws.on('close', unsubscribe)
-        ws.on('error', unsubscribe)
+        containerMw.attachUpgrade(req, socket, head)
       })
     },
   }

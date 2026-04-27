@@ -38,7 +38,13 @@ if (CODEX_AUTH_JSON) {
 }
 
 // 2. spawn codex app-server
-const codex = spawn('codex', ['app-server'], {
+//    最高权限:无 approval prompt,沙箱直通宿主一切访问.
+//    容器本身就是隔离边界,codex 在容器内可以完全放权.
+const codex = spawn('codex', [
+  'app-server',
+  '-c', 'approval_policy="never"',
+  '-c', 'sandbox_mode="danger-full-access"',
+], {
   stdio: ['pipe', 'pipe', 'inherit'],
   env: { ...process.env, CODEX_HOME: codexHome },
 })
