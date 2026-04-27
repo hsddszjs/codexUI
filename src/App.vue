@@ -446,7 +446,7 @@
         :style="contentStyle"
       >
         <span v-if="isVirtualKeyboardOpen" class="content-keyboard-spacer" aria-hidden="true" />
-        <ContentHeader :title="contentTitle" :accent="isSkillsRoute" :current-user="currentUser">
+        <ContentHeader :title="contentTitle" :accent="isSkillsRoute" :current-user="currentUserDisplay || currentUser">
           <template #leading>
             <SidebarThreadControls
               v-if="isSidebarCollapsed || isMobile"
@@ -834,14 +834,16 @@ const { t, uiLanguage, uiLanguageOptions, setUiLanguage } = useUiLanguage()
 
 // 容器模式:首访身份选择
 const currentUser = ref<string | null>(null)
+const currentUserDisplay = ref<string | null>(null)
 const userBootstrapped = ref(false)
 const showUserPicker = computed(() => userBootstrapped.value && currentUser.value === null)
 async function bootstrapCurrentUser(): Promise<void> {
   try {
     const r = await fetch('/codex-api/auth/whoami', { credentials: 'same-origin' })
     if (r.ok) {
-      const j = (await r.json()) as { currentUser: string | null }
+      const j = (await r.json()) as { currentUser: string | null; currentUserDisplay?: string | null }
       currentUser.value = j.currentUser ?? null
+      currentUserDisplay.value = j.currentUserDisplay ?? j.currentUser ?? null
     }
   } catch { currentUser.value = null }
   userBootstrapped.value = true

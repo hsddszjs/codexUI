@@ -74,6 +74,8 @@ export type UiThread = {
   pendingRequestState?: UiPendingRequestState | null
   /** 容器模式:这条 thread 属于哪个内置用户(由后端 thread/list fan-out 时附带) */
   ownerUserName?: string | null
+  /** 二字中文 display name(后端 fan-out 时已经把 name → display 解析好) */
+  ownerDisplay?: string | null
 }
 
 export type UiPendingRequestState = 'approval' | 'response'

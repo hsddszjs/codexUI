@@ -557,6 +557,10 @@ function toUiThread(summary: Thread): UiThread {
     typeof rawSummary.__owner === 'string' && rawSummary.__owner.length > 0
       ? rawSummary.__owner
       : null
+  const ownerDisplay =
+    typeof rawSummary.__ownerDisplay === 'string' && rawSummary.__ownerDisplay.length > 0
+      ? rawSummary.__ownerDisplay
+      : ownerUserName
 
   return {
     id: summary.id,
@@ -570,6 +574,7 @@ function toUiThread(summary: Thread): UiThread {
     unread: false,
     inProgress: readThreadInProgress(summary),
     ownerUserName,
+    ownerDisplay,
   }
 }
 

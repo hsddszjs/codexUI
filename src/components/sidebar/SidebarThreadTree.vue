@@ -29,7 +29,7 @@
             <button class="thread-main-button" type="button" @click.stop="onSelect(thread.id)">
               <span class="thread-row-title-wrap">
                 <span class="thread-row-title-line">
-                  <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
+                  <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerDisplay || thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
                   <!-- 容器模式:已隐藏 worktree 图标 -->
                   <span
                     v-if="threadHasAutomation(thread.id)"
@@ -144,7 +144,7 @@
           <button class="thread-main-button" type="button" @click.stop="onSelect(thread.id)">
             <span class="thread-row-title-wrap">
               <span class="thread-row-title-line">
-                <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
+                <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerDisplay || thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
                 <!-- 容器模式:已隐藏 worktree 图标 -->
                 <span
                   v-if="threadHasAutomation(thread.id)"
@@ -309,7 +309,7 @@
                 <button class="thread-main-button" type="button" @click.stop="onSelect(thread.id)">
                   <span class="thread-row-title-wrap">
                     <span class="thread-row-title-line">
-                      <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
+                      <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerDisplay || thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
                       <!-- 容器模式:已隐藏 worktree 图标 -->
                       <span
                         v-if="threadHasAutomation(thread.id)"

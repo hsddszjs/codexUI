@@ -163,7 +163,11 @@ export function createContainerMiddleware(): ContainerMiddleware {
 
     if (req.method === 'GET' && path === '/codex-api/auth/whoami') {
       const cookie = parseUserCookie(req.headers.cookie)
-      setJson(res, 200, { currentUser: cookie })
+      const def = cookie ? CONTAINER_USERS.find((u) => u.name === cookie) : null
+      setJson(res, 200, {
+        currentUser: cookie,
+        currentUserDisplay: def?.display ?? cookie,
+      })
       return
     }
 

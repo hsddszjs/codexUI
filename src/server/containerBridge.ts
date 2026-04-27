@@ -19,7 +19,7 @@
 import { WebSocketServer, type WebSocket as WsWebSocket } from 'ws'
 import type { IncomingMessage } from 'node:http'
 import type { Duplex } from 'node:stream'
-import { CONTAINER_USERS, type UserDef } from './userConfig.js'
+import { CONTAINER_USERS, type UserDef, findUser } from './userConfig.js'
 
 type JsonRpcMessage = {
   id?: number | string | null
@@ -279,7 +279,12 @@ export class ContainerFleet {
         if (row && typeof row === 'object') {
           const id = (row as Record<string, unknown>).id
           if (typeof id === 'string') this.ownerByThreadId.set(id, r.user)
-          merged.push({ ...(row as Record<string, unknown>), __owner: r.user })
+          const def = CONTAINER_USERS.find((u) => u.name === r.user)
+          merged.push({
+            ...(row as Record<string, unknown>),
+            __owner: r.user,
+            __ownerDisplay: def?.display ?? r.user,
+          })
         }
       }
     }

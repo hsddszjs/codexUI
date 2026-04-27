@@ -50,8 +50,8 @@ const { isMobile } = useMobile()
 
 const SIDEBAR_WIDTH_KEY = 'codex-web-local.sidebar-width.v1'
 const MIN_SIDEBAR_WIDTH = 260
-const MAX_SIDEBAR_WIDTH = 620
-const DEFAULT_SIDEBAR_WIDTH = 320
+const MAX_SIDEBAR_WIDTH = 720
+const DEFAULT_SIDEBAR_WIDTH = 420
 
 function clampSidebarWidth(value: number): number {
   return Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, value))

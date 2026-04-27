@@ -16,13 +16,15 @@ export type UserDef = {
 
 // git author / commit identity 不在这里管 —— 宿主手动准备
 // poc/state/<user>/gitconfig,bind mount 到容器内 /root/.gitconfig
+// name: 英文无空格(cookie / X-User-Name / 容器名后缀)
+// display: 二字中文(picker / header / thread chip 展示)
 export const CONTAINER_USERS: readonly UserDef[] = [
-  { name: 'wangshunfeng', display: 'Wang Shunfeng' },
-  { name: 'zhangsan',     display: 'Zhang San' },
-  { name: 'lisi',         display: 'Li Si' },
-  { name: 'wangwu',       display: 'Wang Wu' },
-  { name: 'zhaoliu',      display: 'Zhao Liu' },
-  { name: 'sunqi',        display: 'Sun Qi' },
+  { name: 'wangshunfeng', display: '顺锋' },
+  { name: 'zhangsan',     display: '张三' },
+  { name: 'lisi',         display: '李四' },
+  { name: 'wangwu',       display: '王五' },
+  { name: 'zhaoliu',      display: '赵六' },
+  { name: 'sunqi',        display: '孙七' },
 ] as const
 
 export const USER_COOKIE = 'codexui_user'
