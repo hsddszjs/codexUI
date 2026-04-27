@@ -182,9 +182,10 @@ export class ContainerFleet {
       session.attach(ws as unknown as WsWebSocket)
       // eslint-disable-next-line no-console
       console.log(`[containerBridge] ${userName} connected`)
-      // 自动 initialize,这样浏览器后续 thread/start 等不会被 codex 拒为 "Not initialized"
+      // 自动 initialize,声明 experimentalApi 让 turn/start 可以带 collaborationMode 等
       void session.rpc('initialize', {
         clientInfo: { name: 'codexui-server', title: 'codexUI', version: '0.0.1' },
+        capabilities: { experimentalApi: true },
       }).catch(() => {})
     })
     return true
