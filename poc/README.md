@@ -39,14 +39,19 @@ poc/
 ├── config/
 │   ├── config.toml         模板,首次启动时复制到 state/<user>/codex-home/
 │   ├── auth.json           真 API key 模板(gitignore)
-│   └── auth.json.example   样例(提交到仓库)
+│   ├── auth.json.example   样例(提交到仓库)
+│   └── gitconfig.example   git 配置样例(start.sh 不会自动生成,
+│                            宿主自己 cp 到 state/<user>/gitconfig 后再起容器)
 ├── state/                  ← gitignore.每个用户一份,运行时数据
 │   └── <user>/
 │       ├── codex-home/     bind mount 到容器 /root/.codex
 │       │   ├── config.toml ← **宿主可直接编辑**(改完重启容器生效)
 │       │   ├── auth.json   ← **宿主可直接编辑**
 │       │   └── sessions/   ← 对话记录持久化(rollout-*.jsonl)
-│       └── workspace/      bind mount 到容器 /workspace
+│       ├── workspace/      bind mount 到容器 /workspace(宿主可直接 vim 文件)
+│       └── gitconfig       bind mount 到容器 /root/.gitconfig
+│                            **宿主手动准备**:cp config/gitconfig.example
+│                            state/<user>/gitconfig + vim 改 user.name / email
 ├── sidecar/
 │   ├── sidecar.mjs         容器内桥接进程(只 spawn codex + ws,不再写 config)
 │   └── package.json        只依赖 ws
@@ -64,6 +69,7 @@ poc/
 |---|---|---|
 | `/root/.codex/config.toml`、`auth.json` | `state/<user>/codex-home/` | **保留**(bind mount) |
 | `/root/.codex/sessions/*.jsonl` | `state/<user>/codex-home/sessions/` | **保留**(对话记录) |
+| `/root/.gitconfig` | `state/<user>/gitconfig` | **保留**(git author 等) |
 | `/workspace` | `state/<user>/workspace/` | **保留**(codex 创建的文件) |
 | 其它容器层(/usr/lib 等) | (无) | 销毁 |
 

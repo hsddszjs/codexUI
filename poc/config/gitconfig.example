@@ -1,0 +1,7 @@
+[user]
+    name = REPLACE_ME
+    email = REPLACE_ME@example.com
+[init]
+    defaultBranch = main
+[safe]
+    directory = /workspace

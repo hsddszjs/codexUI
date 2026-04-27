@@ -12,19 +12,17 @@ export type UserDef = {
   name: string
   /** 给浏览器选择页/header 显示用 */
   display: string
-  /** 注入容器 env: GIT_AUTHOR_NAME / GIT_COMMITTER_NAME(start.sh 里读) */
-  gitName: string
-  /** 同上, GIT_AUTHOR_EMAIL / GIT_COMMITTER_EMAIL */
-  gitEmail: string
 }
 
+// git author / commit identity 不在这里管 —— 宿主手动准备
+// poc/state/<user>/gitconfig,bind mount 到容器内 /root/.gitconfig
 export const CONTAINER_USERS: readonly UserDef[] = [
-  { name: 'wangshunfeng', display: 'Wang Shunfeng', gitName: 'Wang Shunfeng', gitEmail: 'wangshunfeng@example.com' },
-  { name: 'zhangsan',     display: 'Zhang San',     gitName: 'Zhang San',     gitEmail: 'zhangsan@example.com' },
-  { name: 'lisi',         display: 'Li Si',         gitName: 'Li Si',         gitEmail: 'lisi@example.com' },
-  { name: 'wangwu',       display: 'Wang Wu',       gitName: 'Wang Wu',       gitEmail: 'wangwu@example.com' },
-  { name: 'zhaoliu',      display: 'Zhao Liu',      gitName: 'Zhao Liu',      gitEmail: 'zhaoliu@example.com' },
-  { name: 'sunqi',        display: 'Sun Qi',        gitName: 'Sun Qi',        gitEmail: 'sunqi@example.com' },
+  { name: 'wangshunfeng', display: 'Wang Shunfeng' },
+  { name: 'zhangsan',     display: 'Zhang San' },
+  { name: 'lisi',         display: 'Li Si' },
+  { name: 'wangwu',       display: 'Wang Wu' },
+  { name: 'zhaoliu',      display: 'Zhao Liu' },
+  { name: 'sunqi',        display: 'Sun Qi' },
 ] as const
 
 export const USER_COOKIE = 'codexui_user'
