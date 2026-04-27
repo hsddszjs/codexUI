@@ -45,21 +45,7 @@
             </button>
           </div>
 
-          <button
-            v-if="!isSidebarCollapsed"
-            class="sidebar-skills-link"
-            :class="{ 'is-active': isSkillsRoute }"
-            type="button"
-            @click="router.push({ name: 'skills' }); isMobile && setSidebarCollapsed(true)"
-          >
-            <span class="sidebar-skills-link-icon" aria-hidden="true">
-              <IconTablerBolt />
-            </span>
-            <span class="sidebar-skills-link-copy">
-              <span class="sidebar-skills-link-title">{{ t('Skills') }}</span>
-              <span class="sidebar-skills-link-subtitle">{{ t('Plugins, apps, MCPs') }}</span>
-            </span>
-          </button>
+          <!-- 容器模式:已隐藏 Skills / Plugins 入口 -->
 
           <SidebarThreadTree :groups="projectGroups" :project-display-name-by-id="projectDisplayNameById"
             v-if="!isSidebarCollapsed"
@@ -487,17 +473,7 @@
               <IconTablerTerminal class="content-header-terminal-toggle-icon" />
               <span class="content-header-terminal-shortcut">{{ terminalShortcutLabel }}</span>
             </button>
-            <ComposerDropdown
-              v-if="route.name === 'thread' && selectedThreadId"
-              class="content-header-branch-dropdown"
-              :class="{ 'is-review-open': isReviewPaneOpen }"
-              :model-value="contentHeaderBranchDropdownValue"
-              :options="contentHeaderBranchDropdownOptions"
-              :disabled="isLoadingThreadBranches || isSwitchingThreadBranch"
-              :enable-search="true"
-              :search-placeholder="t('Search branches...')"
-              @update:model-value="onSelectContentHeaderBranch"
-            />
+            <!-- 容器模式:已隐藏分支(worktree)选择器 -->
           </template>
         </ContentHeader>
 
@@ -515,15 +491,13 @@
             <div class="content-grid content-grid-home">
               <div class="new-thread-empty">
                 <p class="new-thread-hero">{{ t("Let's build") }}</p>
-                <ComposerDropdown class="new-thread-folder-dropdown" :model-value="newThreadCwd"
+                <!-- 容器模式:容器 cwd 固定为 /workspace,不需要选 folder -->
+                <ComposerDropdown v-if="false" class="new-thread-folder-dropdown" :model-value="newThreadCwd"
                   :options="newThreadFolderOptions" :placeholder="t('Choose folder')"
                   :enable-search="true"
                   :search-placeholder="t('Quick search project')"
                   :disabled="false" @update:model-value="onSelectNewThreadFolder" />
-                <p v-if="newThreadCwd" class="new-thread-folder-selected" :title="newThreadCwd">
-                  {{ t('Selected folder') }}: {{ newThreadCwd }}
-                </p>
-                <div class="new-thread-folder-actions">
+                <div v-if="false" class="new-thread-folder-actions">
                   <button class="new-thread-folder-action new-thread-folder-action-primary" type="button" @click="onOpenExistingFolder">
                     {{ t('Select folder') }}
                   </button>
@@ -683,46 +657,7 @@
                     </div>
                   </div>
                 </Teleport>
-                <ComposerRuntimeDropdown
-                  class="new-thread-runtime-dropdown"
-                  v-model="newThreadRuntime"
-                />
-                <div v-if="newThreadRuntime === 'worktree'" class="new-thread-branch-select">
-                  <p class="new-thread-branch-select-label">{{ t('Base branch') }}</p>
-                  <ComposerDropdown
-                    class="new-thread-branch-dropdown"
-                    :model-value="newWorktreeBaseBranch"
-                    :options="newWorktreeBranchDropdownOptions"
-                    :placeholder="t('Select branch')"
-                    :enable-search="true"
-                    :search-placeholder="t('Search branches...')"
-                    :disabled="isLoadingWorktreeBranches || newWorktreeBranchDropdownOptions.length === 0"
-                    @update:model-value="onSelectNewWorktreeBranch"
-                  />
-                  <p class="new-thread-branch-select-help">
-                    {{
-                      isLoadingWorktreeBranches
-                        ? t('Loading branches…')
-                        : selectedWorktreeBranchLabel
-                          ? t('New worktree branch will start from {branch}.', { branch: selectedWorktreeBranchLabel })
-                          : t('No Git branches found for this folder.')
-                    }}
-                  </p>
-                </div>
-                <p class="new-thread-runtime-help">
-                  {{ t('Local project uses the selected folder directly. New worktree creates an isolated Git worktree before the first prompt.') }}
-                </p>
-                <div
-                  v-if="worktreeInitStatus.phase !== 'idle'"
-                  class="worktree-init-status"
-                  :class="{
-                    'is-running': worktreeInitStatus.phase === 'running',
-                    'is-error': worktreeInitStatus.phase === 'error',
-                  }"
-                >
-                  <strong class="worktree-init-status-title">{{ worktreeInitStatus.title }}</strong>
-                  <span class="worktree-init-status-message">{{ worktreeInitStatus.message }}</span>
-                </div>
+                <!-- 容器模式:已隐藏 worktree 切换 / branch 选择 / 状态 -->
               </div>
 
               <div class="composer-with-queue">

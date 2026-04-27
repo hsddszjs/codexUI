@@ -30,7 +30,7 @@
               <span class="thread-row-title-wrap">
                 <span class="thread-row-title-line">
                   <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
-                  <IconTablerGitFork v-if="thread.hasWorktree" class="thread-row-worktree-icon" :title="t('Worktree thread')" />
+                  <!-- 容器模式:已隐藏 worktree 图标 -->
                   <span
                     v-if="threadHasAutomation(thread.id)"
                     class="thread-row-automation-chip"
@@ -145,7 +145,7 @@
             <span class="thread-row-title-wrap">
               <span class="thread-row-title-line">
                 <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
-                <IconTablerGitFork v-if="thread.hasWorktree" class="thread-row-worktree-icon" :title="t('Worktree thread')" />
+                <!-- 容器模式:已隐藏 worktree 图标 -->
                 <span
                   v-if="threadHasAutomation(thread.id)"
                   class="thread-row-automation-chip"
@@ -310,7 +310,7 @@
                   <span class="thread-row-title-wrap">
                     <span class="thread-row-title-line">
                       <span v-if="thread.ownerUserName" class="thread-row-owner" :title="`Owner: ${thread.ownerUserName}`">{{ thread.ownerUserName }}</span><span class="thread-row-title">{{ thread.title }}</span>
-                      <IconTablerGitFork v-if="thread.hasWorktree" class="thread-row-worktree-icon" :title="t('Worktree thread')" />
+                      <!-- 容器模式:已隐藏 worktree 图标 -->
                       <span
                         v-if="threadHasAutomation(thread.id)"
                         class="thread-row-automation-chip"
@@ -706,7 +706,8 @@ const filteredGroups = computed<UiProjectGroup[]>(() => {
     .filter((group) => group.threads.length > 0)
 })
 
-const isChronologicalView = computed(() => threadViewMode.value === 'chronological')
+// 容器模式:统一用平铺(按时间)视图,去掉项目/目录分组
+const isChronologicalView = computed(() => true)
 
 const globalThreads = computed<UiThread[]>(() => {
   const sourceGroups = filteredGroups.value

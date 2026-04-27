@@ -233,57 +233,9 @@
           </div>
         </div>
 
-        <template v-if="!isDictationRecording">
-          <ComposerDropdown
-            class="thread-composer-control"
-            :model-value="selectedModel"
-            :options="modelOptions"
-            :selected-prefix-icon="showFastModeModelIcon ? IconTablerBolt : null"
-            :placeholder="t('Model')"
-            open-direction="up"
-            :disabled="disabled || !activeThreadId || models.length === 0 || isTurnInProgress"
-            enable-search
-            :search-placeholder="t('Search models...')"
-            @update:model-value="onModelSelect"
-          />
-
-          <ComposerSearchDropdown
-            class="thread-composer-control"
-            :options="skillDropdownOptions"
-            :selected-values="selectedSkillPaths"
-            :placeholder="t('Skills')"
-            :search-placeholder="t('Search skills...')"
-            open-direction="up"
-            :disabled="disabled || !activeThreadId || isTurnInProgress"
-            @toggle="onSkillDropdownToggle"
-          />
-
-          <ComposerSearchDropdown
-            class="thread-composer-control"
-            :options="promptDropdownOptions"
-            :selected-values="[]"
-            :placeholder="t('Prompt')"
-            :display-label-override="t('Prompt')"
-            :search-placeholder="t('Search prompt...')"
-            :create-label="t('Add new prompt')"
-            :allow-remove="true"
-            :remove-label="t('Remove prompt')"
-            open-direction="up"
-            :disabled="disabled || !activeThreadId || isTurnInProgress"
-            @toggle="onPromptDropdownToggle"
-            @create="onCreatePrompt"
-            @remove="onRemovePrompt"
-          />
-
-          <ComposerDropdown
-            class="thread-composer-control"
-            :model-value="selectedReasoningEffort"
-            :options="reasoningOptions"
-            :placeholder="t('Thinking')"
-            open-direction="up"
-            :disabled="disabled || !activeThreadId || isTurnInProgress"
-            @update:model-value="onReasoningEffortSelect"
-          />
+        <!-- 容器模式:已隐藏 model / skills / prompt / reasoning 选择器,由容器内 config.toml 决定 -->
+        <template v-if="false">
+          <ComposerDropdown :model-value="selectedModel" :options="modelOptions" @update:model-value="onModelSelect" />
         </template>
 
         <div
