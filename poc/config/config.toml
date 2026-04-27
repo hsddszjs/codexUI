@@ -1,5 +1,5 @@
 model_provider = "claudecn"
-model = "gpt-5"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 disable_response_storage = true
 
