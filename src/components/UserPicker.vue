@@ -15,16 +15,12 @@
           v-for="u in users"
           :key="u.name"
           class="user-picker-item"
-          :class="{ 'is-offline': !u.online, 'is-busy': busy === u.name }"
+          :class="{ 'is-busy': busy === u.name }"
           :disabled="busy !== null"
           @click="select(u.name)"
         >
           <span class="user-picker-name">{{ u.display }}</span>
           <span class="user-picker-handle">{{ u.name }}</span>
-          <span class="user-picker-state">
-            <span class="user-picker-dot" :class="{ 'is-online': u.online }"></span>
-            {{ u.online ? '容器在线' : '容器离线' }}
-          </span>
         </button>
       </div>
 
@@ -36,7 +32,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-type UserRow = { name: string; display: string; online: boolean }
+type UserRow = { name: string; display: string }
 
 const users = ref<UserRow[]>([])
 const loading = ref(true)
@@ -119,32 +115,16 @@ onMounted(fetchUsers)
   @apply flex flex-col gap-1 rounded-lg border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-slate-400 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60;
 }
 
-.user-picker-item.is-offline {
-  @apply opacity-70;
-}
-
 .user-picker-item.is-busy {
   @apply ring-2 ring-blue-400;
 }
 
 .user-picker-name {
-  @apply text-sm font-semibold text-slate-900;
+  @apply text-base font-semibold text-slate-900;
 }
 
 .user-picker-handle {
   @apply text-xs font-mono text-slate-500;
-}
-
-.user-picker-state {
-  @apply mt-1 flex items-center gap-1.5 text-xs text-slate-500;
-}
-
-.user-picker-dot {
-  @apply inline-block w-1.5 h-1.5 rounded-full bg-slate-400;
-}
-
-.user-picker-dot.is-online {
-  @apply bg-emerald-500;
 }
 
 .user-picker-hint {

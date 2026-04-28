@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { createContainerMiddleware } from "./src/server/containerMiddleware";
+import { createCodexMiddleware } from "./src/server/codexMiddleware";
 import { createDirectoryListingHtml, createTextEditorHtml, decodeBrowsePath, getLocalDirectoryListing, isTextEditableFile, normalizeLocalPath } from "./src/server/localBrowseUi";
 import tailwindcss from "@tailwindcss/vite";
 import { spawnSync } from "node:child_process";
@@ -128,7 +128,7 @@ export default defineConfig({
       name: "codex-bridge",
       configureServer(server) {
         process.env.CODEXUI_SERVER_PORT = String(server.config.server.port ?? 5173);
-        const containerMw = createContainerMiddleware();
+        const codexMw = createCodexMiddleware();
         const httpServer = server.httpServer;
         if (httpServer) {
           httpServer.once("listening", () => {
@@ -144,13 +144,13 @@ export default defineConfig({
             hostScope[WS_UPGRADE_ATTACHED_KEY] = true;
 
             httpServer.on("upgrade", (req, socket, head) => {
-              const handled = containerMw.attachUpgrade(req, socket, head);
+              const handled = codexMw.attachUpgrade(req, socket, head);
               // 未匹配的 upgrade 让 vite 自己处理(HMR 等)
               if (!handled) return;
             });
 
             httpServer.once("close", () => {
-              containerMw.dispose();
+              codexMw.dispose();
             });
           }
         }
@@ -352,9 +352,9 @@ export default defineConfig({
             res.end(JSON.stringify({ error: "Write failed." }));
           });
         });
-        server.middlewares.use((req, res, next) => containerMw.handle(req, res, next));
+        server.middlewares.use((req, res, next) => codexMw.handle(req, res, next));
         server.httpServer?.once("close", () => {
-          containerMw.dispose();
+          codexMw.dispose();
         });
       },
     },

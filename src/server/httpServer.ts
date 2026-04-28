@@ -4,7 +4,7 @@ import type { Server as HttpServer, IncomingMessage } from 'node:http'
 import { existsSync } from 'node:fs'
 import { writeFile, stat } from 'node:fs/promises'
 import express, { type Express } from 'express'
-import { createContainerMiddleware } from './containerMiddleware.js'
+import { createCodexMiddleware } from './codexMiddleware.js'
 import { createAuthSession } from './authMiddleware.js'
 import { createDirectoryListingHtml, createTextEditorHtml, decodeBrowsePath, getLocalDirectoryListing, isTextEditableFile, normalizeLocalPath } from './localBrowseUi.js'
 import { WebSocketServer, type WebSocket } from 'ws'
@@ -74,7 +74,7 @@ function readWildcardPathParam(value: unknown): string {
 
 export function createServer(options: ServerOptions = {}): ServerInstance {
   const app = express()
-  const containerMw = createContainerMiddleware()
+  const codexMw = createCodexMiddleware()
   const authSession = options.password ? createAuthSession(options.password) : null
 
   // 1. Auth middleware (if password is set)
@@ -83,7 +83,7 @@ export function createServer(options: ServerOptions = {}): ServerInstance {
   }
 
   // 2. Container middleware for /codex-api/*
-  app.use((req, res, next) => containerMw.handle(req, res, next))
+  app.use((req, res, next) => codexMw.handle(req, res, next))
 
   // 3. Serve local images referenced in markdown (desktop parity for absolute image paths)
   app.get('/codex-local-image', (req, res) => {
@@ -251,7 +251,7 @@ export function createServer(options: ServerOptions = {}): ServerInstance {
 
   return {
     app,
-    dispose: () => containerMw.dispose(),
+    dispose: () => codexMw.dispose(),
     attachWebSocket: (server: HttpServer) => {
       server.on('upgrade', (req: IncomingMessage, socket, head) => {
         const url = new URL(req.url ?? '', 'http://localhost')
@@ -261,7 +261,7 @@ export function createServer(options: ServerOptions = {}): ServerInstance {
           socket.destroy()
           return
         }
-        containerMw.attachUpgrade(req, socket, head)
+        codexMw.attachUpgrade(req, socket, head)
       })
     },
   }
