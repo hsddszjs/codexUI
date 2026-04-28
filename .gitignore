@@ -13,3 +13,7 @@ pnpm-lock.yaml
 package.json
 DYNAMIC_INSTRUCTIONS.md
 .omx/
+
+# docker build 用的临时产物,不入库
+.docker-prod-modules/
+sandbox-ca.crt

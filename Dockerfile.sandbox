@@ -1,0 +1,45 @@
+# 沙箱专用,用于本机测试 build.macOS / 用户机器请用主 Dockerfile.
+FROM ubuntu:24.04 AS base
+ENV DEBIAN_FRONTEND=noninteractive
+ENV NODE_VERSION=22
+
+# 沙箱 self-signed CA
+COPY sandbox-ca.crt /usr/local/share/ca-certificates/sandbox-ca.crt
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg git tini; \
+    update-ca-certificates; \
+    mkdir -p /etc/apt/keyrings; \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+      | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg; \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" \
+      > /etc/apt/sources.list.d/nodesource.list
+
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends nodejs; \
+    node --version; \
+    npm --version; \
+    npm config set cafile /etc/ssl/certs/ca-certificates.crt; \
+    npm install -g @openai/codex; \
+    codex --version || true; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY package.json /app/
+COPY dist/ /app/dist/
+COPY dist-cli/ /app/dist-cli/
+COPY scripts/fix-pty-native-build.cjs /app/scripts/fix-pty-native-build.cjs
+# host 预 build 好的 prod node_modules.沙箱里 node-gyp 装不了 node-pty,
+# 用 host 上 npm install --omit=dev 装好的产物直接搬进来.
+# host 是 linux/amd64,镜像也是 linux/amd64,native 二进制兼容.
+COPY .docker-prod-modules /app/node_modules
+
+EXPOSE 5999
+VOLUME ["/root/.codex", "/root/codex-worktrees"]
+ENTRYPOINT ["tini", "--", "node", "/app/dist-cli/index.js"]
+CMD ["--port", "5999", "--no-tunnel", "--no-login", "--no-password", "--no-open"]

@@ -1,0 +1,40 @@
+# 大目录,不要放进 build context
+node_modules/
+# 但 .docker-prod-modules/(host 预 build 的 prod-only deps)需要进去给 COPY
+!.docker-prod-modules
+.git/
+.github/
+.cursor/
+.agents/
+.cert/
+.playwright-cli/
+.omx/
+output/
+test-results/
+coverage/
+
+# 测试 / 文档(不影响运行)
+test/
+documentation/
+docs/
+llm-wiki/
+tests.md
+*.md
+!README.md
+
+# 沙箱专属(注意:Dockerfile.sandbox 需要它,所以允许;主 Dockerfile 不引用)
+# sandbox-ca.crt
+
+# IDE / 系统
+.DS_Store
+.vscode/
+.idea/
+
+# 防止 docker build 把宿主的 codex 数据/worktree 目录吸进去
+state/
+codex-worktrees/
+
+# Misc
+*.log
+.env*
+!.env.example
